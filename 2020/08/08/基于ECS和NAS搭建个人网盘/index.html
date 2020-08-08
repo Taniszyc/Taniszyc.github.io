@@ -1,0 +1,185 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>基于ECS和NAS搭建个人网盘 | Taniszyc</title><meta name="description" content="基于ECS和NAS，使用OwnCloud搭建个人网盘"><meta name="keywords" content="ECS,NAS,个人网盘"><meta name="author" content="Taniszyc"><meta name="copyright" content="Taniszyc"><meta name="format-detection" content="telephone=no"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://sscc.ink/2020/08/08/%E5%9F%BA%E4%BA%8EECS%E5%92%8CNAS%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E7%BD%91%E7%9B%98/"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//fonts.googleapis.com" crossorigin="crossorigin"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta property="og:type" content="article"><meta property="og:title" content="基于ECS和NAS搭建个人网盘"><meta property="og:url" content="https://sscc.ink/2020/08/08/%E5%9F%BA%E4%BA%8EECS%E5%92%8CNAS%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E7%BD%91%E7%9B%98/"><meta property="og:site_name" content="Taniszyc"><meta property="og:description" content="基于ECS和NAS，使用OwnCloud搭建个人网盘"><meta property="og:image" content="https://tva4.sinaimg.cn/large/0084aYsLly1ggjpj48m8pj31z4140qcz.jpg"><meta property="article:published_time" content="2020-08-08T09:46:38.995Z"><meta property="article:modified_time" content="2020-08-08T10:27:24.834Z"><meta name="twitter:card" content="summary"><script>var activateDarkMode = function () {
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#000')
+  }
+}
+var activateLightMode = function () {
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#fff')
+  }
+}
+
+var getCookies = function (name) {
+  const value = `; ${document.cookie}`
+  const parts = value.split(`; ${name}=`)
+  if (parts.length === 2) return parts.pop().split(';').shift()
+}
+
+var autoChangeMode = 'false'
+var t = getCookies('theme')
+if (autoChangeMode === '1') {
+  var isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+  var isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+  var isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined) {
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport) {
+      console.log('You specified no preference for a color scheme or your browser does not support it. I Schedule dark mode during night time.')
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour <= 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+      if (Cookies.get('theme') === undefined) {
+        e.matches ? activateDarkMode() : activateLightMode()
+      }
+    })
+  } else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else if (autoChangeMode === '2') {
+  now = new Date()
+  hour = now.getHours()
+  isNight = hour <= 6 || hour >= 18
+  if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else {
+  if (t === 'dark') activateDarkMode()
+  else if (t === 'light') activateLightMode()
+}</script><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web&amp;display=swap"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  noticeOutdate: undefined,
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime_unit: '天',
+  runtime: true,
+  copyright: {"limitCount":50,"languages":{"author":"作者: Taniszyc","link":"链接: ","source":"来源: Taniszyc","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  baiduPush: false,
+  highlightCopy: true,
+  highlightLang: true,
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isanchor: false    
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isSidebar: true,
+  postUpdate: '2020-08-08 18:27:24'
+}</script><noscript><style>
+#nav {
+  opacity: 1
+}
+.justified-gallery img {
+  opacity: 1
+}
+</style></noscript><meta name="generator" content="Hexo 5.0.0"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" data-lazy-src="/img/avatar.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">1</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">2</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">1</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div id="body-wrap"><div id="sidebar"><i class="fas fa-arrow-right on" id="toggle-sidebar"></i><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E8%BF%9E%E6%8E%A5ECS%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="toc-number">1.</span> <span class="toc-text">一、连接ECS服务器</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E5%AE%89%E8%A3%85-OwnCloud"><span class="toc-number">2.</span> <span class="toc-text">二、安装 OwnCloud</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E5%AE%89%E8%A3%85-Apache-%E6%9C%8D%E5%8A%A1"><span class="toc-number">3.</span> <span class="toc-text">三、安装 Apache 服务</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E5%AE%89%E8%A3%85%E5%B9%B6%E9%85%8D%E7%BD%AEPHP"><span class="toc-number">4.</span> <span class="toc-text">四、安装并配置PHP</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E9%85%8D%E7%BD%AEOwnCloud"><span class="toc-number">5.</span> <span class="toc-text">五、配置OwnCloud</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E6%8C%82%E8%BD%BDNAS%E6%9C%8D%E5%8A%A1"><span class="toc-number">6.</span> <span class="toc-text">六、挂载NAS服务</span></a></li></ol></div></div></div><header class="post-bg" id="page-header" style="background-image: url(https://tva4.sinaimg.cn/large/0084aYsLly1ggjpj48m8pj31z4140qcz.jpg)"><nav id="nav"><span class="pull-left" id="blog_name"><a class="blog_title" id="site-name" href="/">Taniszyc</a></span><span class="pull-right menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><span class="toggle-menu close"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="post-info"><div id="post-title"><div class="posttitle">基于ECS和NAS搭建个人网盘</div></div><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2020-08-08T09:46:38.995Z" title="发表于 2020-08-08 17:46:38">2020-08-08</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2020-08-08T10:27:24.834Z" title="更新于 2020-08-08 18:27:24">2020-08-08</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E7%BB%BC%E5%90%88%E5%AD%A6%E4%B9%A0/">综合学习</a></span></div><div class="meta-secondline"> <span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout_post" id="content-inner"><article id="post"><div class="post-content" id="article-container"><h4 id="一、连接ECS服务器"><a href="#一、连接ECS服务器" class="headerlink" title="一、连接ECS服务器"></a>一、连接ECS服务器</h4><h4 id="二、安装-OwnCloud"><a href="#二、安装-OwnCloud" class="headerlink" title="二、安装 OwnCloud"></a>二、安装 OwnCloud</h4><p>OwnCloud是一款开源的云存储软件，基于PHP的自建网盘。基本上是私人使用，没有用户注册功能，但是有用户添加功能，你可以无限制地添加用户，OwnCloud支持多个平台（windows，MAC，Android，IOS，Linux）。</p>
+<p>1.执行以下命令，添加一个新的软件源。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">rpm --import https:&#x2F;&#x2F;download.owncloud.org&#x2F;download&#x2F;repositories&#x2F;10.0&#x2F;CentOS_7&#x2F;repodata&#x2F;repomd.xml.key</span><br><span class="line"></span><br><span class="line">wget http:&#x2F;&#x2F;download.owncloud.org&#x2F;download&#x2F;repositories&#x2F;10.0&#x2F;CentOS_7&#x2F;ce:10.0.repo -O &#x2F;etc&#x2F;yum.repos.d&#x2F;ce:10.0.repo</span><br></pre></td></tr></table></figure>
+
+<p>2.执行以下命令安装OwnCloud-files。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install owncloud-files</span><br></pre></td></tr></table></figure>
+
+<p>3.执行以下命令查看安装是否成功。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ll &#x2F;var&#x2F;www&#x2F;html</span><br></pre></td></tr></table></figure>
+
+<p><img src= "/img/loading.gif" data-lazy-src="https://img.alicdn.com/tfs/TB15MD6HxD1gK0jSZFyXXciOVXa-629-78.png" alt="img"></p>
+<h4 id="三、安装-Apache-服务"><a href="#三、安装-Apache-服务" class="headerlink" title="三、安装 Apache 服务"></a>三、安装 Apache 服务</h4><p>1.执行以下命令安装Apache服务。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install httpd –y</span><br></pre></td></tr></table></figure>
+
+<p>2.执行以下命令启动Apache服务。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl start httpd.service</span><br></pre></td></tr></table></figure>
+
+<p>3.打开浏览器输入体验平台创建的ECS的弹性公网IP。如果出现如下图内容表示Apache安装成功。</p>
+<p><img src= "/img/loading.gif" data-lazy-src="https://img.alicdn.com/tfs/TB1vopec5cKOu4jSZKbXXc19XXa-1652-418.png" alt="img"></p>
+<p>4.添加OwnCloud配置：</p>
+<p>1）执行以下命令打开Apache配置文件。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim &#x2F;etc&#x2F;httpd&#x2F;conf&#x2F;httpd.conf</span><br></pre></td></tr></table></figure>
+
+<p>2）按<code>i</code>键进入文件编辑模式，然后在<Directory>内容后添加以下内容。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"># owncloud config</span><br><span class="line">Alias &#x2F;owncloud &quot;&#x2F;var&#x2F;www&#x2F;html&#x2F;owncloud&#x2F;&quot;</span><br><span class="line">&lt;Directory &#x2F;var&#x2F;www&#x2F;html&#x2F;owncloud&#x2F;&gt;</span><br><span class="line">    Options +FollowSymlinks</span><br><span class="line">    AllowOverride All</span><br><span class="line">    &lt;IfModule mod_dav.c&gt;</span><br><span class="line">        Dav off</span><br><span class="line">    &lt;&#x2F;IfModule&gt;</span><br><span class="line">    SetEnv HOME &#x2F;var&#x2F;www&#x2F;html&#x2F;owncloud</span><br><span class="line">    SetEnv HTTP_HOME &#x2F;var&#x2F;www&#x2F;html&#x2F;owncloud</span><br><span class="line">&lt;&#x2F;Directory&gt;</span><br></pre></td></tr></table></figure>
+
+<p><img src= "/img/loading.gif" data-lazy-src="https://img.alicdn.com/tfs/TB1aLD3Hrr1gK0jSZR0XXbP8XXa-1136-814.png" alt="img"></p>
+<p>3）按<code>esc</code>键退出编辑模式，然后输入<code>:wq</code>保存并退出配置文件。</p>
+<h4 id="四、安装并配置PHP"><a href="#四、安装并配置PHP" class="headerlink" title="四、安装并配置PHP"></a>四、安装并配置PHP</h4><p>1.执行以下命令手动更新rpm源。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">rpm -Uvh https:&#x2F;&#x2F;dl.fedoraproject.org&#x2F;pub&#x2F;epel&#x2F;epel-release-latest-7.noarch.rpm   </span><br><span class="line">rpm -Uvh https:&#x2F;&#x2F;mirror.webtatic.com&#x2F;yum&#x2F;el7&#x2F;webtatic-release.rpm   </span><br></pre></td></tr></table></figure>
+
+<p>2.执行以下命令安装PHP 7.2版本。</p>
+<p>说明：OwnCloud只支持PHP 5.6+。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">yum -y install php72w</span><br><span class="line">yum -y install php72w-cli php72w-common php72w-devel php72w-mysql php72w-xml php72w-odbc php72w-gd php72w-intl php72w-mbstring</span><br></pre></td></tr></table></figure>
+
+<p>3.执行以下命令检测PHP是否安装成功。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">php -v</span><br></pre></td></tr></table></figure>
+
+<p>4.将PHP配置到Apache中：</p>
+<p>1）执行以下命令，找到php.ini文件目录。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">find &#x2F; -name php.ini</span><br></pre></td></tr></table></figure>
+
+<p>2）执行以下命令打开httpd.conf文件。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vi &#x2F;etc&#x2F;httpd&#x2F;conf&#x2F;httpd.conf</span><br></pre></td></tr></table></figure>
+
+<p>3）按<code>i</code>键进入文件编辑模式，然后在文件最后添加以下内容。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">PHPIniDir &#x2F;etc&#x2F;php.ini</span><br></pre></td></tr></table></figure>
+
+<p>4）按<code>esc</code>键退出编辑模式，然后输入<code>:wq</code>保存并退出配置文件。</p>
+<p>5）执行以下命令，重启Apache服务。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl restart httpd.service</span><br></pre></td></tr></table></figure>
+
+<h4 id="五、配置OwnCloud"><a href="#五、配置OwnCloud" class="headerlink" title="五、配置OwnCloud"></a>五、配置OwnCloud</h4><p>完成上述配置后，就可以登录OwnCloud创建个人网盘了。</p>
+<p>1.打开浏览器，输入<code>ECS弹性IP/owncloud</code>，例如<code>1.1.1.1/owncloud</code>。</p>
+<p>2.创建管理员账号和密码，然后单击【存储&amp;数据库】，配置数据库，最后单击【安装完成】。</p>
+<p>  <img src= "/img/loading.gif" data-lazy-src="https://img.alicdn.com/tfs/TB1hJYNzUT1gK0jSZFrXXcNCXXa-565-852.jpg" alt="img"></p>
+<p>3.输入已创建的用户名和密码登录Owncloud。</p>
+<p><img src= "/img/loading.gif" data-lazy-src="https://img.alicdn.com/tfs/TB11XYhxHr1gK0jSZR0XXbP8XXa-1005-477.png" alt="img"></p>
+<p>登录成功界面如下：</p>
+<p><img src= "/img/loading.gif" data-lazy-src="https://img.alicdn.com/tfs/TB117rPzQY2gK0jSZFgXXc5OFXa-1896-622.jpg" alt="img"></p>
+<h4 id="六、挂载NAS服务"><a href="#六、挂载NAS服务" class="headerlink" title="六、挂载NAS服务"></a>六、挂载NAS服务</h4><p>完成OwnCloud初始化之后就可以将NAS存储包挂载到网盘服务器上。</p>
+<p>1.登录阿里云控制台。在产品列表页，搜索NAS，然后单击【文件存储NAS】。</p>
+<p><img src= "/img/loading.gif" data-lazy-src="https://img.alicdn.com/tfs/TB1IhzZHqL7gK0jSZFBXXXZZpXa-617-313.png" alt="img"></p>
+<p>2.点击左侧【文件系统列表】，创建文件系统，创建完成后单击【文件系统 ID】进入文件系统详情页。</p>
+<p><img src= "/img/loading.gif" data-lazy-src="https://img.alicdn.com/tfs/TB1MN_1Hvb2gK0jSZK9XXaEgFXa-1168-280.png" alt="img"></p>
+<p>3.选择【挂载使用】，然后单击【添加挂载点】选择专有网络，最后单击【确定】。</p>
+<p><img src= "/img/loading.gif" data-lazy-src="https://img.alicdn.com/tfs/TB1IZrLzND1gK0jSZFyXXciOVXa-1664-682.jpg" alt="img"></p>
+<p>4.在命令行终端，执行以下命令安装NFS客户端。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install nfs-utils</span><br></pre></td></tr></table></figure>
+
+<p>5.在控制台，单击【挂载文件系统到ECS】查看挂载命令。</p>
+<p><img src= "/img/loading.gif" data-lazy-src="https://img.alicdn.com/tfs/TB1Ev29Hrj1gK0jSZFuXXcrHpXa-1077-612.png" alt="img"></p>
+<p>6.在打开的挂载文件系统到ECS页面复制挂载命令。</p>
+<p><img src= "/img/loading.gif" data-lazy-src="https://img.alicdn.com/tfs/TB19HL7HAT2gK0jSZPcXXcKkpXa-562-203.png" alt="img"></p>
+<p>7.将复制好的挂载命令粘贴到记事本中，然后把命令最后的<code>/mnt</code>替换为：<code>/var/www/html/owncloud/data/&lt;OwnCloud登录名&gt;</code>。</p>
+<p>例如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo mount -t nfs -o vers&#x3D;3,nolock,proto&#x3D;tcp,rsize&#x3D;1048576,wsize&#x3D;1048576,hard,timeo&#x3D;600,retrans&#x3D;2,noresvport 3ad894afd4-uon67.cn-shanghai.nas.aliyuncs.com:&#x2F; &#x2F;var&#x2F;www&#x2F;html&#x2F;owncloud&#x2F;data&#x2F;admin</span><br></pre></td></tr></table></figure>
+
+<p>9.在命令窗口执行上一步骤的挂载命令。</p>
+<p><img src= "/img/loading.gif" data-lazy-src="https://img.alicdn.com/tfs/TB1gyH1HpY7gK0jSZKzXXaikpXa-1116-142.png" alt="img"></p>
+<p>10.执行以下命令查看挂载是否成功。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">df -h | grep aliyun</span><br></pre></td></tr></table></figure>
+
+<p><img src= "/img/loading.gif" data-lazy-src="https://img.alicdn.com/tfs/TB1Dopec5cKOu4jSZKbXXc19XXa-1138-138.png" alt="img"></p>
+<p>注意：NAS挂载成功后，OwnCloud网盘中的默认目录和文件不可读写，请在网盘中新建目录上传。</p>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">Taniszyc</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://sscc.ink/2020/08/08/%E5%9F%BA%E4%BA%8EECS%E5%92%8CNAS%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E7%BD%91%E7%9B%98/">https://sscc.ink/2020/08/08/%E5%9F%BA%E4%BA%8EECS%E5%92%8CNAS%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E7%BD%91%E7%9B%98/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://sscc.ink" target="_blank">Taniszyc</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/ECS/">ECS</a><a class="post-meta__tags" href="/tags/NAS/">NAS</a></div><div class="post_share"><div class="social-share" data-image="https://tva4.sinaimg.cn/large/0084aYsLly1ggjpj48m8pj31z4140qcz.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"></nav></article></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2020 By Taniszyc</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div><div class="icp"><a target="_blank" rel="noopener" href="http://www.beian.miit.gov.cn/state/outPortal/loginPortal.action"><img class="icp-icon" src="/img/icp.png"/><span>湘ICP备20008494号-1</span></a></div></div></footer></div><section id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="font_plus" type="button" title="放大字体"><i class="fas fa-plus"></i></button><button id="font_minus" type="button" title="缩小字体"><i class="fas fa-minus"></i></button><button id="translateLink" type="button" title="简繁转换">简</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></section><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page/instantpage.min.js" type="module" defer></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload/dist/lazyload.iife.min.js" async></script><div class="js-pjax"><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></div></body></html>
